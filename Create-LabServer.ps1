@@ -3,6 +3,7 @@
 $VMName = 'EL-DEMO-F01'
 $VMIP = '172.16.0.201/24'
 $DNSIP = '172.16.0.200'
+$GWIP = '172.16.0.1'
 
 # Script Variables that don't vary
 $diskpath = "D:\VHD\$VMName.vhdx"
@@ -28,6 +29,7 @@ $VHD = (Mount-VHD -Path $diskpath -Passthru |
 [xml]$Unattend = Get-Content $SourceXML
 $Unattend.unattend.settings[1].component[2].ComputerName = $VMName
 $Unattend.unattend.settings[1].component[3].Interfaces.Interface.UnicastIpAddresses.IpAddress.'#text' = $VMIP
+$Unattend.unattend.settings[1].component[3].Interfaces.Interface.Routes.Route.NextHopAddress = $GWIP
 $Unattend.unattend.settings[1].component[4].Interfaces.Interface.DNSServerSearchOrder.IpAddress.'#Text' = $DNSIP
 $Unattend.Save("${VHD}:\\Unattend.xml")
 # dismount VHD
