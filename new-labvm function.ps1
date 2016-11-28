@@ -10,7 +10,7 @@
       .EXAMPLE
       New-LabVM -VMName HOSTNAME -VMIP 10.0.0.18/29
       .EXAMPLE
-      New-LabVM -VMName Hostname -VMIP 192.168.123.0/24 -DNSIP 8.8.8.8
+      New-LabVM -VMName Hostname -VMIP 192.168.123.20/24 -DNSIP 8.8.8.8 -GWIP 192.168.123.1
   #>
   param
   (
@@ -24,7 +24,11 @@
     
     [Parameter(Position=2)]
     [string]
-    $DNSIP = '172.16.0.200'
+    $DNSIP = '172.16.0.200',
+
+    [Parameter(Position=3)]
+    [string]
+    $GWIP = '172.16.0.1'
   )
   
   #region define variables
@@ -55,6 +59,7 @@
     $Unattend.unattend.settings[1].component[2].ComputerName = $VMName
     $Unattend.unattend.settings[1].component[3].Interfaces.Interface.UnicastIpAddresses.IpAddress.'#text' = $VMIP
     $Unattend.unattend.settings[1].component[4].Interfaces.Interface.DNSServerSearchOrder.IpAddress.'#Text' = $DNSIP
+    $Unattend.unattend.settings[1].component[3].Interfaces.Interface.Routes.Route.NextHopAddress = $GWIP
     $Unattend.Save("${VHD}:\\Unattend.xml")
     # dismount VHD
     Dismount-VHD $diskpath
