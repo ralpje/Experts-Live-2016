@@ -10,7 +10,7 @@
       .EXAMPLE
       New-LabVM -VMName HOSTNAME -VMIP 10.0.0.18/29
       .EXAMPLE
-      New-LabVM -VMName Hostname -VMIP 192.168.123.0/24 -DNSIP 8.8.8.8
+      New-LabVM -VMName Hostname -VMIP 192.168.123.20/24 -DNSIP 8.8.8.8 -GWIP 192.168.123.1
   #>
   param
   (
@@ -24,17 +24,21 @@
     
     [Parameter(Position=2)]
     [string]
-    $DNSIP = '172.16.0.200'
+    $DNSIP = '172.16.0.200',
+
+    [Parameter(Position=3)]
+    [string]
+    $GWIP = '172.16.0.1'
   )
   
   #region define variables
     
     # Script Variables that are the same for each server
     # Adjust these variables according to your environment
-    $diskpath = "D:\VHD\$VMName.vhdx"
-    $ParentDisk = 'D:\VHD\BASE\Server2016Base.vhdx'
-    $VMSwitch = 'HO-Demo-Lab'
-    $SourceXML = 'D:\Scripts\Lab VM\unattend.xml'
+    $diskpath = "D:\$VMName.vhdx"
+    $ParentDisk = 'G:\SoftwareLib\VHD Templates\W2K16_Template.vhdx'
+    $VMSwitch = 'NATnetwork'
+    $SourceXML = 'G:\GitHub\private\unattend.xml'
   #endregion
   
   #region create diff disk
@@ -55,6 +59,7 @@
     $Unattend.unattend.settings[1].component[2].ComputerName = $VMName
     $Unattend.unattend.settings[1].component[3].Interfaces.Interface.UnicastIpAddresses.IpAddress.'#text' = $VMIP
     $Unattend.unattend.settings[1].component[4].Interfaces.Interface.DNSServerSearchOrder.IpAddress.'#Text' = $DNSIP
+    $Unattend.unattend.settings[1].component[3].Interfaces.Interface.Routes.Route.NextHopAddress = $GWIP
     $Unattend.Save("${VHD}:\\Unattend.xml")
     # dismount VHD
     Dismount-VHD $diskpath
